@@ -29,17 +29,6 @@ Remember, OAuth requires that callback URLs are hosted using SSL, so ensure that
 
 Make sure you then configure the same callback URL against your application at [Spotify Developer](https://developer.spotify.com/).
 
-## Deploying to Open Shift
-
-Ensure that you have the [OpenShift Client Tools](https://developers.openshift.com/en/managing-client-tools.html) installed and configured.
-
-Run the following commands, remembering to give a unique application name in place of <app_name>
-
-$ cd spotify-playlist-editor
-$ rhc app create <app_name> nodejs-0.10
-
-You then need to [configure SSL](https://developers.openshift.com/en/managing-domains-ssl.html) before the Spotify OAuth callback will work.
-
 ## Credits
 
 Thanks to heroku/node-js-getting-started, spotify/web-api-auth-examples and the [OpenShift 'nodejs' cartridge](http://openshift.github.io/documentation/oo_cartridge_guide.html#nodejs)for the vast majority of this code.
