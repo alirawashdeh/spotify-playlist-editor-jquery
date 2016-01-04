@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Example of the Authorization Code flow with Spotify</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="./main.css">
+    <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"> -->
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <style type="text/css">
+      #login, #loggedin {
+        /*display: none;*/
+      }
+      .text-overflow {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 500px;
+      }
+    </style>
+  </head>
+
+  <body>
+      <div class="header">
+        <div class="container">
+          <span><a href="./">Spotify Playlist Editor</a></span>
+        </div>
+      </div>
+      <div class="main-body">
+    <div class="container">
+      <div id="login">
+        <h1>This is an example of the Authorization Code flow</h1>
+        <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+      </div>
+      <div id="loggedin">
+        <div class="media">
+          <div style="margin-top:5px;">
+
+            <span style="display:inline;">Logged in as <img style="margin-right:5px;" width="30" src="http://www.joomlaworks.net/images/demos/galleries/abstract/7.jpg" />Ali Ra </span>
+
+          </div>
+        </div>
+      </div>
+      <div id="playlists">
+      <h2>Playlists</h2>
+      <ul id="playlistList" class="list-group">
+
+        <li class="list-group-item">Example Playlist</li>
+        <li class="list-group-item">Example Playlist</li>
+        <li class="list-group-item">Example Playlist</li>
+        <li class="list-group-item">Example Playlist</li>
+        <li class="list-group-item">Example Playlist</li>
+
+      </ul>
+    </div>
+      <div id="tracks">
+        <a id="backToPlaylists">Back to My Playlists</a>
+        <h2>Tracks</h2>
+        <ul id="trackList" class="list-group">
+
+          <li class="list-group-item">Track name - artist name</li>
+          <li class="list-group-item">Track name - artist name</li>
+          <li class="list-group-item">Track name - artist name</li>
+          <li class="list-group-item">Track name - artist name</li>
+
+        </ul>
+
+        <button id="previousbutton" type="button" class="btn btn-primary">Previous Page</button>
+
+        <button id="nextbutton" type="button" class="btn btn-primary">Next Page</button>
+
+      </div>
+    </div>
+  </div>
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://rubaxa.github.io/Sortable/Sortable.js"></script>
+  <script>
+      (function() {
+
+        /**
+         * Obtains parameters from the hash of the URL
+         * @return Object
+         */
+        function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+
+        var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+            userProfileTemplate = Handlebars.compile(userProfileSource),
+            userProfilePlaceholder = document.getElementById('user-profile');
+
+        var playlistsSource = document.getElementById('playlists-template').innerHTML,
+                playlistsTemplate = Handlebars.compile(playlistsSource),
+                playlistsPlaceholder = document.getElementById('playlists');
+
+          var tracksSource = document.getElementById('tracks-template').innerHTML,
+                  tracksTemplate = Handlebars.compile(tracksSource),
+                  tracksPlaceholder = document.getElementById('tracks');
+
+
+
+        var params = getHashParams();
+
+        var access_token = params.access_token,
+            refresh_token = params.refresh_token,
+            error = params.error;
+
+        var selectedPlaylist;
+        var userref;
+        var currentOffset;
+        var nextPageURL;
+        var previousPageURL;
+
+
+        if (error) {
+          alert('There was an error during the authentication');
+        } else {
+          if (access_token) {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me',
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+
+                $('#login').hide();
+                $('#loggedin').show();
+                  userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+                  userref = response.href;
+                  listPlaylists(userref);
+                }
+            });
+          } else {
+              // render initial screen
+              $('#login').show();
+              $('#loggedin').hide();
+          }
+
+
+          function listPlaylists(userref) {
+            $.ajax({
+                url: userref + '/playlists',
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+                  playlistsPlaceholder.innerHTML = playlistsTemplate(response);
+
+                  $('#playlists').show();
+                  $('#tracks').hide();
+
+                }
+            });
+          }
+
+          $('#playlists').on('click', 'li', function () {
+            selectedPlaylist = $( this ).attr('id');
+              $.ajax({
+                  url: userref + '/playlists/' + $( this ).attr('id') + "/tracks",
+                  headers: {
+                    'Authorization': 'Bearer ' + access_token
+                  },
+                  success: function(response) {
+
+                        tracksPlaceholder.innerHTML = tracksTemplate(response);
+                        nextPageURL = response.next;
+                        previousPageURL = response.previous;
+                        currentOffset = response.offset;
+                        Sortable.create(trackList, {delay:100,
+                          onEnd: function (/**Event*/evt) {
+                                  moveItem(evt.oldIndex,evt.newIndex);
+                              }
+                            });
+                        $('#playlists').hide();
+                        $('#tracks').show();
+                  }
+              });
+          });
+
+
+
+          $('#tracks').on('click', '#nextbutton', function () {
+            $.ajax({
+                url: nextPageURL,
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+
+                      tracksPlaceholder.innerHTML = tracksTemplate(response);
+                      nextPageURL = response.next;
+                      previousPageURL = response.previous;
+                      currentOffset = response.offset;
+                      Sortable.create(trackList, {delay:100,
+                        onEnd: function (/**Event*/evt) {
+                                moveItem(currentOffset,evt.oldIndex,evt.newIndex);
+                            }
+                          });
+                }
+            });
+            event.preventDefault();
+            return false;
+          });
+
+          $('#tracks').on('click', '#previousbutton', function () {
+            $.ajax({
+                url: previousPageURL,
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+
+                      tracksPlaceholder.innerHTML = tracksTemplate(response);
+                      nextPageURL = response.next;
+                      previousPageURL = response.previous;
+                      currentOffset = response.offset;
+                      Sortable.create(trackList, {delay:100,
+                        onEnd: function (/**Event*/evt) {
+                                moveItem(currentOffset,evt.oldIndex,evt.newIndex);
+                            }
+                          });
+                }
+            });
+            event.preventDefault();
+            return false;
+          });
+
+          $('#tracks').on('click', '#backToPlaylists', function () {
+            listPlaylists(userref);
+            return false;
+          });
+
+
+         function moveItem(currentOffset, oldPos, newPos) {
+                   $.ajax({
+                       url: userref + '/playlists/' + selectedPlaylist + "/tracks",
+                       headers: {
+                         'Authorization': 'Bearer ' + access_token
+                       },
+                        type: 'PUT',
+                        data: "{ \"range_start\" : " + (currentOffset + oldPos) + ", \"insert_before\" : " + (currentOffset + newPos) + " }",
+                       success: function(response) {
+
+                       }
+                   });
+         }
+        }
+      })();
+    </script>
+</html>

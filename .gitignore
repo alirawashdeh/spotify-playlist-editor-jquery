@@ -1,0 +1,5 @@
+node_modules
+trustca.crt
+npm-debug.log
+.openshift
+.DS_Store
