@@ -12,9 +12,9 @@ Currently, the Android Spotify app doesn't allow you reorder tracks in your play
 
 ## Configuration
 
-Create an app at [Spotify Developer](https://developer.spotify.com/)
+Log in to [Spotify Developer](https://developer.spotify.com/) and create an application.
 
-Modify the following part of the index.js file to include your client ID and client secret:
+Modify the following part of the index.js file to include the client ID and client secret of your application on Spotify Developer.
 
 ```
 var client_id = 'CLIENT_ID_GOES_HERE'; // Your client id
