@@ -3,7 +3,9 @@
 
 The Spotify Playlist Editor is a node.js web application that allows Spotify users to rearrange tracks in their playlists online.
 
-Currently hosted at (www.playlisteditor.com)[www.playlisteditor.com]
+Currently hosted at [www.playlisteditor.com](www.playlisteditor.com)
+
+![ScreenShot](screenshots.png)
 
 ### But why?
 Currently, the Android Spotify app doesn't allow you reorder tracks in your playlists - this must be carried out on the desktop application or iOS app.
