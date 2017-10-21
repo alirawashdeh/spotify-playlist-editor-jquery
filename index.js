@@ -1,23 +1,27 @@
-
-/**
- * This is an example of a basic node.js script that performs
- * the Authorization Code oAuth2 flow to authenticate against
- * the Spotify Accounts.
- *
- * For more information, read
- * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
- */
-
-var http = require('http');
-var express = require('express'); // Express web server framework
+var express = require('express');
 var request = require('request'); // "Request" library
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
-var client_id = 'CLIENT_ID_GOES_HERE'; // Your client id
-var client_secret = 'CLIENT_SECRET_GOES_HERE'; // Your client secret
+var client_id = process.env.client_id || 'CLIENT_ID_GOES_HERE';// Your client id
+var client_secret = process.env.client_secret || 'CLIENT_SECRET_GOES_HERE'; // Your client secret
+var redirect_uri = process.env.redirect_uri || 'https://www.DEPLOYED_APP.com/callback'; // Your redirect uri
 
-var redirect_uri = 'https://www.DEPLOYED_APP.com/callback'; // Your redirect uri
+var stateKey = 'spotify_auth_state';
+var app = express();
+
+app.set('port', (process.env.PORT || 5000));
+
+app.use(express.static(__dirname + '/public'))
+   .use(cookieParser());
+
+// views is directory for all template files
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+
+app.get('/', function(request, response) {
+  response.render('pages/index');
+});
 
 /**
  * Generates a random string containing numbers and letters
@@ -33,16 +37,6 @@ var generateRandomString = function(length) {
   }
   return text;
 };
-
-var stateKey = 'spotify_auth_state';
-
-var app = express();
-
-
-server = http.createServer(app);
-
-app.use(express.static(__dirname + '/public'))
-   .use(cookieParser());
 
 app.get('/login', function(req, res) {
 
@@ -148,6 +142,6 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-server.listen((process.env.OPENSHIFT_NODEJS_PORT || 8080), process.env.OPENSHIFT_NODEJS_IP, function() {
-    console.log('Node server started o ...');
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
 });

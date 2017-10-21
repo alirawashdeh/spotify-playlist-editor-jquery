@@ -36,7 +36,8 @@ p{
 
 .login
 {
-	background: url(back.jpg) no-repeat center center fixed;
+	background: transparent url(../images/back.jpg) no-repeat center center fixed;
+	background-color: #111111;
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	-o-background-size: cover;
@@ -124,7 +125,10 @@ p{
 .list-group-item {
 	position: relative;
 	display: block;
-	padding: 10px 15px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left:15px;
+	padding-right:10px;
 	font-size: 0.9em;
 
 	background-color: #FFF;
@@ -136,7 +140,16 @@ p{
 	margin-top: 2px;
 	cursor: pointer;
 
+	overflow: auto;
+}
 
+.drag-handle
+{
+	float:right;
+	text-align:center;
+	width:30px;
+	height:20px;
+	color:#444444;
 }
 
 
