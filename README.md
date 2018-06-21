@@ -1,3 +1,6 @@
+# WARNING
+
+Note: This version of the playlist editor was intended to be an experiment with jquery. This repository is now deprecated, please see alirawashdeh/spotify-playlist-editor for the new version which doesn't require javascript.
 
 # Spotify Playlist Editor
 
